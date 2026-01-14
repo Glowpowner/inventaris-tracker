@@ -1,73 +1,188 @@
-# Welcome to your Lovable project
+# 📦 Voorraad Scan & Telling App – Handleiding
 
-## Project info
+## Doel van deze app
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Deze web-app wordt gebruikt om **equipment op locatie te tellen** door middel van het scannen van barcodes/QR-codes en deze te vergelijken met een **Excel-lijst**.
 
-## How can I edit this code?
+De app houdt automatisch bij:
 
-There are several ways of editing your application.
+* Wat er **wel** gescand is
+* Wat er **ontbreekt**
+* Welke scans **onbekend** zijn
 
-**Use Lovable**
+De app ondersteunt equipmentnummers met de prefixes **IDT** en **EQN**, die door een fusie van twee bedrijven naast elkaar bestaan.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🔑 Belangrijkste uitgangspunten
 
-**Use your preferred IDE**
+* De **Excel-kolom `Equipment#`** is altijd leidend
+* In Excel staan **geen URL’s**
+* Tijdens het scannen kan:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+  * een **URL** voorkomen
+  * een nummer **zonder IDT/EQN** voorkomen
+* De app corrigeert dit automatisch
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🗂 Vereisten
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+* Een Excel-bestand (`.xlsx`)
+* Een barcode-/QR-scanner
+  *(scanner werkt als toetsenbord + Enter)*
+* Een moderne browser (Chrome, Edge)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 📥 Stap 1 – Excel uploaden
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Open de app
+2. Upload het Excel-bestand
+3. De app herkent automatisch de kolom **`Equipment#`**
+4. Extra kolommen zoals **Cat** en **Class** worden automatisch meegenomen
+
+Na upload zie je een tabel met:
+
+* Equipment#
+* Cat
+* Class
+* Geteld (start op 0)
+
+---
+
+## 📡 Stap 2 – Scannen
+
+Klik in het **scanveld** (staat standaard al actief) en begin met scannen.
+
+### Wat gebeurt er bij elke scan?
+
+#### 1️⃣ URL wordt genegeerd
+
+Als je dit scant:
+
+```
+https://eqin.centix.com/object/249bq-g0X/3105123
 ```
 
-**Edit a file directly in GitHub**
+Dan gebruikt de app alleen:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+3105123
+```
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+#### 2️⃣ Nummer wordt opgeschoond
 
-## What technologies are used for this project?
+* Spaties weg
+* Hoofdletters
+* Alleen letters en cijfers
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+#### 3️⃣ Slimme matching (heel belangrijk)
 
-## How can I deploy this project?
+De app probeert **altijd in deze volgorde**:
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+1. **Exact match** met `Equipment#`
+2. Geen match?
 
-## Can I connect a custom domain to my Lovable project?
+   * Is het **7 cijfers** → probeer:
 
-Yes, you can!
+     * `IDTxxxxxxx`
+     * `EQNxxxxxxx`
+3. Scan begint met `IDT` of `EQN`?
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+   * Dan probeert hij ook:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+     * zonder prefix
+     * met de **andere prefix**
+
+✅ Voorbeelden:
+
+* Scan: `3105123` → matcht `IDT3105123` of `EQN3105123`
+* Scan: `IDT3105123` → matcht ook `EQN3105123`
+* Scan: `EQN3105123` → matcht ook `IDT3105123`
+
+---
+
+#### 4️⃣ Resultaat
+
+* **Match gevonden** → `Geteld +1`
+* **Geen match** → komt in **Onbekende scans**
+
+Je krijgt altijd een melding (toast) met:
+
+* gevonden equipment
+* nieuw geteld aantal
+  of
+* melding dat het onbekend is
+
+---
+
+## 📊 Filters & overzicht
+
+Boven de tabel kun je:
+
+* Filteren op **Cat**
+* Filteren op **Class**
+* Zoeken op **Equipment#**
+
+Dit is handig bij grote lijsten of categorie-tellingen.
+
+---
+
+## 📤 Exporteren
+
+### Resultaat export
+
+Je kunt het resultaat exporteren naar Excel met:
+
+* Alle originele kolommen
+* `Geteld`
+* `MatchedFrom` (welke scan heeft gematcht)
+
+### Onbekende scans
+
+Onbekende scans zijn apart te downloaden met:
+
+* Originele scan
+* Genormaliseerde waarde
+* Tijdstip
+
+---
+
+## 🔄 Reset telling
+
+Met **Reset tellingen**:
+
+* worden alle `Geteld` waarden weer 0
+* Excel blijft ongewijzigd
+
+---
+
+## 💾 Gegevens blijven bewaard
+
+* Tellingen worden lokaal opgeslagen in de browser
+* Pagina verversen = **geen data kwijt**
+* Alleen reset of nieuwe Excel wist tellingen
+
+---
+
+## 🖼 App-overzicht
+
+(Automatische preview van de app)
+
+![App screenshot](https://screenshot2.lovable.dev/e294cbfd-959b-4eea-a1f1-98b787a5920f/id-preview-95fadc6b--1e34b315-cfbe-45b9-b3d7-7a13da54049f.lovable.app-1768371219864.png)
+
+---
+
+## ✅ Samenvatting
+
+✔ Ondersteunt IDT & EQN
+✔ Negeert URL’s automatisch
+✔ Slimme matching bij oude nummers
+✔ Perfect voor inventaris & locatiecontrole
+
+---
