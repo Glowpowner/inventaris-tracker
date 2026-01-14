@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/inventaris-tracker/",   // 👈 DIT TOEVOEGEN oke
+  base: "/inventaris-tracker/",   // 👈 DIT TOEVOEGEN oke-
 
   server: {
     host: "::",
